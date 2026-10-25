@@ -18,9 +18,13 @@ app.get('/health', async (req, res) => {
 const auth = require('./routes/auth');
 const courses = require('./routes/courses');
 const enrollments = require('./routes/enrollments');
+const quizzes = require('./routes/quizzes');
+const assignments = require('./routes/assignments');
 app.use('/auth', auth);
 app.use('/courses', courses);
 app.use('/enrollments', enrollments);
+app.use('/quizzes', quizzes);
+app.use('/assignments', assignments);
 
 const port = process.env.PORT || 4000;
 if (require.main === module) app.listen(port, () => console.log('listening', port));
