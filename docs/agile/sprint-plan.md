@@ -14,6 +14,10 @@ Sprints are **2 weeks**. Each sprint has a goal, pulls stories from the [product
 | 5 | Discovery & dashboards | C1 (search), E1, E2, E4, B6 | Search, role-specific dashboards, admin overview. **B6 (categories) was not finished and moved back to the backlog as G1.** |
 | 6 | Ship it: packaging, quality, polish | F1, F2, F4, F6, A4, B4, E3 | Docker one-command run, CI, dark mode, validation/security hardening, delete/management features |
 
+## Project timeline and history note
+- **Project kickoff:** 15 October 2026.
+- **Repository history:** the work done between kickoff and 25 October 2026 was lost before it was committed to this repository, so the commit history here begins on 25 October 2026. Commit dates are kept as they actually happened; the sprint increments below were rebuilt in this repository and are traceable to those commits (see [CHANGELOG](../../CHANGELOG.md)).
+
 ## Sprint 1 — Foundations
 - **Goal:** a user can create an account and authenticate against a real database.
 - **Done:** Express server + Postgres connection, registration, JWT login, auth integration tests.
