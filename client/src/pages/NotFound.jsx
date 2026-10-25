@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 export default function NotFound({ guest }) {
   return (
     <div className="text-center py-24 px-4">
-      <p className="text-7xl font-black bg-gradient-to-r from-indigo-600 dark:from-indigo-400 to-fuchsia-500 dark:to-fuchsia-400 bg-clip-text text-transparent">404</p>
+      <p className="text-7xl font-black bg-gradient-to-r from-indigo-600 dark:from-indigo-400 to-violet-500 dark:to-violet-400 bg-clip-text text-transparent">404</p>
       <h1 className="mt-4 text-2xl font-black text-slate-900 dark:text-white">Page not found</h1>
       <p className="mt-2 text-slate-500 dark:text-slate-400">The page you're looking for doesn't exist or moved.</p>
       <div className="mt-6 flex justify-center gap-2.5">

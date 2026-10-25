@@ -45,7 +45,7 @@ export default function Landing() {
       <section className="relative pt-12 sm:pt-16 pb-16">
         <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#eef2ff_0%,#f6f7fb_60%)] dark:bg-[linear-gradient(to_bottom,#0b1129_0%,#020617_60%)]" />
-          <div className="absolute -top-24 left-1/2 -translate-x-1/2 h-[480px] w-[820px] rounded-full bg-gradient-to-r from-indigo-400/30 via-violet-400/30 to-fuchsia-400/30 dark:from-indigo-600/20 dark:via-violet-600/20 dark:to-fuchsia-600/20 blur-3xl" />
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 h-[480px] w-[820px] rounded-full bg-gradient-to-r from-indigo-400/30 via-violet-400/30 to-violet-400/30 dark:from-indigo-600/20 dark:via-violet-600/20 dark:to-violet-600/20 blur-3xl" />
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_30%,black,transparent)]" />
         </div>
 
@@ -58,7 +58,7 @@ export default function Landing() {
           <h1 className="mt-6 text-4xl sm:text-6xl font-black tracking-tight leading-[1.05]">
             Learn anything,
             <br />
-            <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 dark:from-indigo-400 dark:via-violet-400 dark:to-fuchsia-400 bg-clip-text text-transparent">master everything.</span>
+            <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-violet-600 dark:from-indigo-400 dark:via-violet-400 dark:to-violet-400 bg-clip-text text-transparent">master everything.</span>
           </h1>
           <p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
             Learnova is a modern learning platform where instructors publish courses and students
@@ -85,10 +85,10 @@ export default function Landing() {
           {/* Featured course — live data from the catalog */}
           {featured && (
             <div className="mt-14 relative max-w-4xl mx-auto">
-              <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500/20 via-violet-500/20 to-fuchsia-500/20 blur-2xl rounded-[2rem]" />
+              <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500/20 via-violet-500/20 to-violet-500/20 blur-2xl rounded-[2rem]" />
               <div className="relative rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-indigo-950/10 overflow-hidden text-left grid md:grid-cols-[1fr_1.1fr]">
                 <div className={`relative p-7 sm:p-8 bg-gradient-to-br ${coverFor(featured.id)} text-white flex flex-col justify-between gap-6`}>
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.25),transparent_50%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.1),transparent_50%)]" />
                   <div className="relative">
                     <p className="text-xs font-bold uppercase tracking-widest text-white/80">Featured course</p>
                     <h3 className="mt-2 text-2xl font-black tracking-tight">{featured.title}</h3>
@@ -144,7 +144,7 @@ export default function Landing() {
       <section id="how" className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="rounded-[2rem] bg-slate-950 dark:bg-black border dark:border-slate-800 overflow-hidden relative">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(99,102,241,0.35),transparent_50%),radial-gradient(circle_at_90%_100%,rgba(217,70,239,0.25),transparent_50%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(99,102,241,0.35),transparent_50%),radial-gradient(circle_at_90%_100%,rgba(139,92,246,0.25),transparent_50%)]" />
             <div className="relative p-8 sm:p-14 grid lg:grid-cols-2 gap-10 items-center">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-300">How it works</p>
@@ -211,8 +211,8 @@ export default function Landing() {
       {/* STORIES */}
       <section className="pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="rounded-[2rem] bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 p-8 sm:p-12 text-center text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.25),transparent_60%)]" />
+          <div className="rounded-[2rem] bg-gradient-to-r from-indigo-700 to-violet-700 p-8 sm:p-12 text-center text-white relative overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1),transparent_60%)]" />
             <h2 className="relative text-3xl sm:text-4xl font-black tracking-tight">Your next skill is one click away</h2>
             <p className="relative mt-3 text-white/80">Free to start, no credit card required.</p>
             <div className="relative mt-7 flex flex-col sm:flex-row justify-center gap-3">

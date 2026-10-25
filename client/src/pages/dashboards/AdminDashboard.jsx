@@ -84,14 +84,14 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div className="relative overflow-hidden rounded-[1.75rem] bg-slate-950 dark:bg-black border dark:border-slate-800 text-white p-7 sm:p-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(217,70,239,0.3),transparent_55%),radial-gradient(circle_at_90%_100%,rgba(99,102,241,0.4),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(139,92,246,0.3),transparent_55%),radial-gradient(circle_at_90%_100%,rgba(99,102,241,0.4),transparent_55%)]" />
         <div className="relative flex flex-col lg:flex-row lg:items-center gap-6 justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-300">Admin console</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-300">Admin console</p>
             <h1 className="mt-2 text-3xl sm:text-4xl font-black tracking-tight">Platform overview, {firstName}.</h1>
             <p className="mt-2 text-slate-300/90 max-w-lg">Manage users, courses and enrollment across the whole platform.</p>
             <div className="mt-5 flex gap-2.5">
-              <Link to="/teach/new" className="px-5 py-2.5 rounded-xl bg-white text-slate-900 text-sm font-semibold hover:bg-fuchsia-50 transition">+ New course</Link>
+              <Link to="/teach/new" className="px-5 py-2.5 rounded-xl bg-white text-slate-900 text-sm font-semibold hover:bg-violet-50 transition">+ New course</Link>
               <Link to="/courses" className="px-5 py-2.5 rounded-xl border border-white/20 text-sm font-semibold hover:bg-white/10 transition">View catalog</Link>
             </div>
           </div>
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
           <StatCard label="Users" value={overview?.users?.total ?? 0} grad="from-indigo-600 to-violet-500" />
           <StatCard label="Courses" value={overview?.courses?.total ?? 0} grad="from-sky-600 to-blue-600" />
           <StatCard label="Enrollments" value={overview?.enrollments?.total ?? 0} grad="from-emerald-500 to-teal-500" />
-          <StatCard label="Published" value={`${overview?.courses?.published ?? 0}/${overview?.courses?.total ?? 0}`} grad="from-fuchsia-600 to-purple-600" />
+          <StatCard label="Published" value={`${overview?.courses?.published ?? 0}/${overview?.courses?.total ?? 0}`} grad="from-violet-600 to-purple-600" />
         </div>
       )}
 
@@ -126,7 +126,7 @@ export default function AdminDashboard() {
                   <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{u.email} · {u.enrolled} enrolled · {u.teaching} teaching</p>
                 </div>
                 {u.id === user?.id ? (
-                  <span className="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide bg-fuchsia-100 dark:bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300">You</span>
+                  <span className="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide bg-violet-100 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300">You</span>
                 ) : (
                   <>
                     <select value={u.role} onChange={(e) => changeRole(u, e.target.value)} aria-label={`Role for ${u.full_name}`}

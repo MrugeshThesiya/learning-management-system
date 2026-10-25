@@ -90,7 +90,7 @@ export default function Register() {
       </div>
 
       <div className="hidden lg:flex relative overflow-hidden bg-slate-950 dark:bg-black text-white p-12 flex-col justify-between order-1 lg:order-2 border-l border-white/10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(99,102,241,0.5),transparent_55%),radial-gradient(circle_at_15%_90%,rgba(217,70,239,0.35),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(99,102,241,0.5),transparent_55%),radial-gradient(circle_at_15%_90%,rgba(139,92,246,0.35),transparent_55%)]" />
         <div className="relative" />
         <div className="relative">
           <h2 className="text-4xl font-black leading-tight tracking-tight">One account.<br />Every course, quiz & grade.</h2>
