@@ -1,5 +1,7 @@
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
+const path = require('path');
 const { pool } = require('./db');
 
 // Demo accounts (passwords are for local development only)
@@ -157,6 +159,10 @@ async function upsertUser(u) {
 }
 
 async function seed() {
+  // Ensure tables exist (compose DB is ephemeral via tmpfs, so this runs on fresh PG)
+  const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+  await pool.query(schema);
+
   const ids = {};
   for (const u of USERS) {
     ids[u.email] = (await upsertUser(u)).id;

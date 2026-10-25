@@ -47,12 +47,27 @@ Ceremonies: sprint planning, daily stand-up, backlog refinement, sprint review (
 - Dockerized stack + GitHub Actions CI
 
 ## Run with Docker
+Prerequisites: Docker + Docker Compose.
+
 ```bash
 docker compose up --build
 ```
-Frontend: http://localhost:5173, Backend: http://localhost:4000
+Frontend: http://localhost:5173, Backend: http://localhost:4000 (health: `GET /health`), DB: localhost:5433.
 
-The compose database is ephemeral; the server container seeds demo data on every start.
+How the stack starts:
+- `db` (Postgres 16) has a `pg_isready` healthcheck; `server` waits for `db` to be healthy.
+- `server` runs `node src/wait-for-db.js && node src/seed.js && npm start`: it waits for Postgres (up to ~120s), ensures `schema.sql` tables exist, then idempotently seeds demo data on every start.
+- `server`/`client` use `restart: unless-stopped`.
+
+Useful commands:
+```bash
+docker compose up -d        # start in background
+docker compose ps           # container status
+docker compose logs -f server  # follow API logs
+docker compose down         # stop and remove containers/network
+```
+
+The compose database is ephemeral (`tmpfs`); data resets on `down` and the server container re-seeds demo data on every start.
 
 ## Run locally
 Backend (needs Postgres — easiest: `docker compose up -d db` from the repo root):
@@ -67,7 +82,7 @@ cd client && npm install && npm run dev
 > File watching uses polling (`vite.config.js`, `nodemon --legacy-watch`) so edits are picked up on FUSE/NTFS/network drives, where inotify events never fire. Without it the dev server keeps serving stale code (e.g. new routes 404).
 
 ## Demo data & test credentials
-Seed demo users, courses, lessons, a quiz, an assignment, and enrollments:
+Seed demo users, courses, lessons, a quiz, an assignment, and enrollments (automatic in `docker compose up`; run manually for local dev):
 ```bash
 cd server && npm run seed
 ```
@@ -118,8 +133,8 @@ cd server; npm test
 ```
 client (React/Vite)  ->  server (Express)  ->  PostgreSQL
 ```
-- Frontend communicates via REST JSON over HTTP.
-- Backend uses `pg` pool; schema auto-initialized on startup.
+- Frontend communicates via REST JSON over HTTP. It uses `VITE_API_URL` (compose sets `http://localhost:4000`) and falls back to `http://localhost:4000`.
+- Backend uses `pg` pool; schema auto-initialized on startup (`index.js`), and `seed.js` also applies `schema.sql` so a fresh ephemeral DB works.
 - JWT stored client-side (localStorage) and sent as Bearer token.
 
 ## Tech Stack
@@ -137,6 +152,8 @@ client (React/Vite)  ->  server (Express)  ->  PostgreSQL
 │   │   ├── index.js
 │   │   ├── db.js
 │   │   ├── schema.sql
+│   │   ├── seed.js
+│   │   ├── wait-for-db.js
 │   │   ├── middleware/
 │   │   └── routes/
 │   └── tests/
@@ -146,7 +163,11 @@ client (React/Vite)  ->  server (Express)  ->  PostgreSQL
 └── .github/workflows/ci.yml
 ```
 
-## Environment Variables (server)
-- DATABASE_URL (default postgres://lms:lms@localhost:5432/lms)
+## Environment Variables
+Server (`server/.env`, see `.env.example`):
+- DATABASE_URL — inside compose: `postgres://lms:lms@db:5432/lms`; local dev via `docker compose up -d db`: `postgres://lms:lms@localhost:5433/lms` (default `postgres://lms:lms@localhost:5432/lms`)
 - JWT_SECRET (default "secret")
 - PORT (default 4000)
+
+Client:
+- VITE_API_URL (default `http://localhost:4000`; compose sets it explicitly)
