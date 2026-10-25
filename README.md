@@ -45,9 +45,22 @@ cd client && npm install && npm run dev
 ```
 
 ## Tests
+
+Linux:
 ```bash
 cd server && npm test
 ```
+
+macOS:
+```bash
+cd server && npm test
+```
+
+Windows (PowerShell):
+```powershell
+cd server; npm test
+```
+
 
 ## API Endpoints
 - POST /auth/register, POST /auth/login
@@ -93,9 +106,3 @@ client (React/Vite)  ->  server (Express)  ->  PostgreSQL
 - DATABASE_URL (default postgres://lms:lms@localhost:5432/lms)
 - JWT_SECRET (default "secret")
 - PORT (default 4000)
-
-## Contributing
-Branch from `main`, use conventional commits, open PR. Run tests before pushing.
-
-## License
-MIT
