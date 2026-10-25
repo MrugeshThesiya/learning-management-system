@@ -2,9 +2,13 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { pool } = require('./db');
+const fs = require('fs');
+const path = require('path');
 const app = express();
 app.use(cors());
 app.use(express.json());
+const schema = fs.readFileSync(path.join(__dirname,'schema.sql'),'utf8');
+pool.query(schema).catch(e=>console.error(e));
 
 app.get('/health', async (req, res) => {
   try { await pool.query('SELECT 1'); res.json({ status: 'ok' }); }
