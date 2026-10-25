@@ -36,4 +36,9 @@ router.get('/:id/lessons', async (req, res) => {
   res.json(r.rows);
 });
 
+router.get('/search', async (req,res)=>{
+  const q='%'+(req.query.q||'')+'%';
+  const r=await query('SELECT * FROM courses WHERE title ILIKE $1 OR description ILIKE $1',[q]);
+  res.json(r.rows);
+});
 module.exports = router;
