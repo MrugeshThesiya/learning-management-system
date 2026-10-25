@@ -8,7 +8,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 const schema = fs.readFileSync(path.join(__dirname,'schema.sql'),'utf8');
-const initPromise = pool.query(schema).catch(e=>console.error(e));
+const initPromise = pool
+  .query(schema)
+  .catch((e) => console.error('DB init failed — is Postgres running? Set DATABASE_URL. Details:', e.message));
 app.use(async (req,res,next)=>{ await initPromise; next(); });
 
 app.get('/health', async (req, res) => {

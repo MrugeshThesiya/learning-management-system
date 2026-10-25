@@ -35,14 +35,31 @@ docker compose up --build
 Frontend: http://localhost:5173, Backend: http://localhost:4000
 
 ## Run locally
-Backend:
+Backend (needs Postgres — easiest: `docker compose up -d db` from the repo root):
 ```bash
-cd server && npm install && npm start
+cd server && npm install && npm run dev
 ```
+`server/.env` is preconfigured for the compose DB (`postgres://lms:lms@localhost:5433/lms`).
 Frontend:
 ```bash
 cd client && npm install && npm run dev
 ```
+
+## Demo data & test credentials
+Seed demo users, courses, lessons, a quiz, an assignment, and enrollments:
+```bash
+cd server && npm run seed
+```
+The seed is idempotent — safe to re-run. All three app roles are covered:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin@learnova.app` | `admin123` |
+| Instructor | `instructor@learnova.app` | `instructor123` |
+| Student | `demo@learnova.app` | `password123` |
+
+> Local-dev only. Never use these in production.
+> The demo student starts enrolled in two courses with progress, so the dashboard shows data immediately.
 
 ## Tests
 
