@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: cd server && npm ci
+      - run: cd server && npm install
       - env:
           DATABASE_URL: postgres://lms:lms@localhost:5432/lms
           JWT_SECRET: test
