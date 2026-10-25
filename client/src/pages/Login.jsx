@@ -34,10 +34,10 @@ export default function Login() {
     <div className="min-h-screen grid lg:grid-cols-2 bg-[#f6f7fb] dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       {/* Brand panel */}
       <div className="hidden lg:flex relative overflow-hidden bg-slate-950 dark:bg-black text-white p-12 flex-col justify-between border-r border-white/10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(99,102,241,0.5),transparent_55%),radial-gradient(circle_at_85%_90%,rgba(217,70,239,0.35),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(99,102,241,0.5),transparent_55%),radial-gradient(circle_at_85%_90%,rgba(139,92,246,0.35),transparent_55%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:32px_32px]" />
         <Link to="/" className="relative flex items-center gap-2.5">
-          <span className="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center font-black text-lg">L</span>
+          <span className="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center font-black text-lg">L</span>
           <span className="font-extrabold text-xl">Learnova</span>
         </Link>
         <div className="relative">

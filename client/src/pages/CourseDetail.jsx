@@ -86,7 +86,7 @@ export default function CourseDetail() {
       {err && <Alert>{err}</Alert>}
 
       <div className={`relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br ${coverFor(course.id)} text-white p-7 sm:p-10`}>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.25),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.1),transparent_50%)]" />
         <div className="relative">
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-white/20 border border-white/30 backdrop-blur">
             {course.is_published ? 'Course · Self-paced' : 'Draft · only you can see this'}

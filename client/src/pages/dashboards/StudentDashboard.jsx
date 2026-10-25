@@ -65,7 +65,7 @@ export default function StudentDashboard() {
     <div className="space-y-8">
       {/* Header */}
       <div className="relative overflow-hidden rounded-[1.75rem] bg-slate-950 dark:bg-black border dark:border-slate-800 text-white p-7 sm:p-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(99,102,241,0.45),transparent_55%),radial-gradient(circle_at_90%_100%,rgba(217,70,239,0.3),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(99,102,241,0.45),transparent_55%),radial-gradient(circle_at_90%_100%,rgba(139,92,246,0.3),transparent_55%)]" />
         <div className="relative flex flex-col lg:flex-row lg:items-center gap-6 justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-300">{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>

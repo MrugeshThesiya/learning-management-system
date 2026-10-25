@@ -2,12 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const COVERS = [
-  'from-indigo-600 via-violet-600 to-fuchsia-500',
-  'from-sky-600 via-blue-600 to-indigo-600',
-  'from-emerald-600 via-teal-600 to-cyan-500',
-  'from-amber-500 via-orange-600 to-rose-500',
-  'from-violet-600 via-purple-600 to-indigo-700',
-  'from-rose-500 via-pink-600 to-fuchsia-600',
+  'from-indigo-700 to-slate-800',
+  'from-sky-700 to-slate-800',
+  'from-emerald-700 to-slate-800',
+  'from-amber-700 to-stone-800',
+  'from-violet-700 to-slate-800',
+  'from-teal-700 to-slate-800',
 ];
 
 export function coverFor(id) {
@@ -31,7 +31,7 @@ export default function CourseCard({ course, enrolled, progress, onEnroll, enrol
   return (
     <article className="group rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.06)] hover:shadow-[0_16px_40px_-16px_rgba(79,70,229,0.35)] hover:-translate-y-1 transition-all duration-300">
       <div className={`relative h-36 bg-gradient-to-br ${cover} overflow-hidden`}>
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,white,transparent_45%),radial-gradient(circle_at_85%_15%,white,transparent_35%)]" />
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_20%_20%,white,transparent_45%),radial-gradient(circle_at_85%_15%,white,transparent_35%)]" />
         <div className="absolute top-3 left-3 flex gap-2">
           <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/20 text-white backdrop-blur border border-white/30">
             {course.is_published === false ? 'Draft' : 'Course'}
