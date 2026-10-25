@@ -42,6 +42,6 @@ Sprint length: **2 weeks**. Planned roadmap: six sprints (see [sprint plan](docs
 
 ## Tooling
 - **Backlog / board:** GitHub Issues + a Projects board with columns `Backlog → Ready → In progress → In review → Done` (issue templates in `.github/ISSUE_TEMPLATE/`).
-- **Version control:** `main` (releasable) ← `develop` (integration) ← `feature/*`, `fix/*` branches. See [workflow](docs/agile/workflow.md).
+- **Version control:** `main` (always releasable) ← short-lived `feature/*` and `fix/*` branches via PR. See [workflow](docs/agile/workflow.md).
 - **Commits:** Conventional Commits (`feat:`, `fix:`, `chore:`, `test:`, `docs:`, `ci:`).
 - **CI:** GitHub Actions runs the server test suite against a Postgres service on every push and PR.

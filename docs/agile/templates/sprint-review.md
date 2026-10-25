@@ -19,4 +19,4 @@
 ## Metrics
 - Stories done / committed:
 - Defects found after "Done":
-- CI status of `develop`:
+- CI status of `main`:

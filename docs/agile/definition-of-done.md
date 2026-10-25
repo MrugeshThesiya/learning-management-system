@@ -18,7 +18,7 @@ A story is **Done** only when all of these are true:
 - [ ] Inputs validated; no unhandled promise rejections; no secrets committed.
 - [ ] No placeholder or fake data shown to users.
 - [ ] Docs updated (README / backlog status / CHANGELOG) when behaviour, setup or scope changes.
-- [ ] Merged to `develop` with a Conventional Commit message; `main` stays releasable.
+- [ ] Merged to `main` via PR with a Conventional Commit message; `main` stays releasable.
 
 ## Working agreements
 - Stand-up updates are short: yesterday, today, blockers. Blockers go to the [impediments log](risks-and-impediments.md).
