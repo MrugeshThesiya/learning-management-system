@@ -103,19 +103,15 @@ async function seed() {
   const studentId = ids['demo@learnova.app'];
 
   for (const c of COURSES) {
-    const cr = await pool.query(
-      `INSERT INTO courses (title, description, instructor_id, is_published)
-       VALUES ($1,$2,$3,TRUE)
-       ON CONFLICT DO NOTHING RETURNING id`,
-      [c.title, c.description, instructorId]
-    );
-    let courseId;
-    if (cr.rows[0]) {
-      courseId = cr.rows[0].id;
-    } else {
-      const existing = await pool.query('SELECT id FROM courses WHERE title=$1', [c.title]);
-      courseId = existing.rows[0].id;
-    }
+    // No unique constraint on title, so look first to keep the seed idempotent
+    const existing = await pool.query('SELECT id FROM courses WHERE title=$1 ORDER BY id LIMIT 1', [c.title]);
+    const courseId = existing.rows[0]
+      ? existing.rows[0].id
+      : (await pool.query(
+          `INSERT INTO courses (title, description, instructor_id, is_published)
+           VALUES ($1,$2,$3,TRUE) RETURNING id`,
+          [c.title, c.description, instructorId]
+        )).rows[0].id;
     console.log(`course: ${c.title}`);
 
     for (let i = 0; i < c.lessons.length; i++) {
@@ -158,14 +154,28 @@ async function seed() {
     }
   }
 
-  // Give the demo student something on the dashboard: enrollments with progress
+  // Give the demo student something on the dashboard: enrollments with real lesson progress
   const firstTwo = await pool.query('SELECT id FROM courses WHERE is_published=TRUE ORDER BY id LIMIT 2');
-  const progresses = [65, 30];
+  const completedCounts = [4, 2];
   for (let i = 0; i < firstTwo.rows.length; i++) {
+    const courseId = firstTwo.rows[i].id;
     await pool.query(
-      `INSERT INTO enrollments (user_id, course_id, progress)
-       VALUES ($1,$2,$3) ON CONFLICT (user_id, course_id) DO NOTHING`,
-      [studentId, firstTwo.rows[i].id, progresses[i] ?? 0]
+      `INSERT INTO enrollments (user_id, course_id) VALUES ($1,$2) ON CONFLICT (user_id, course_id) DO NOTHING`,
+      [studentId, courseId]
+    );
+    await pool.query(
+      `INSERT INTO lesson_progress (user_id, lesson_id)
+       SELECT $1, id FROM lessons WHERE course_id=$2 ORDER BY "order", id LIMIT $3
+       ON CONFLICT DO NOTHING`,
+      [studentId, courseId, completedCounts[i] ?? 0]
+    );
+    await pool.query(
+      `UPDATE enrollments e SET progress = COALESCE((
+         SELECT ROUND(100.0 * COUNT(*) / NULLIF((SELECT COUNT(*) FROM lessons WHERE course_id=e.course_id), 0))
+         FROM lesson_progress lp JOIN lessons l ON l.id = lp.lesson_id
+         WHERE l.course_id = e.course_id AND lp.user_id = e.user_id), 0)
+       WHERE e.user_id=$1 AND e.course_id=$2`,
+      [studentId, courseId]
     );
   }
 

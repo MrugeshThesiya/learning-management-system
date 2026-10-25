@@ -65,3 +65,12 @@ CREATE TABLE IF NOT EXISTS submissions (
   grade NUMERIC,
   submitted_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS lesson_progress (
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  lesson_id INTEGER REFERENCES lessons(id) ON DELETE CASCADE,
+  completed_at TIMESTAMP DEFAULT NOW(),
+  PRIMARY KEY (user_id, lesson_id)
+);
+-- One submission per student per assignment (resubmitting updates it)
+CREATE UNIQUE INDEX IF NOT EXISTS submissions_unique_user_assignment ON submissions (assignment_id, user_id);
