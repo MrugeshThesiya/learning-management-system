@@ -76,15 +76,20 @@ The seed is idempotent — safe to re-run. All three app roles are covered:
 | Role | Email | Password |
 | --- | --- | --- |
 | Admin | `admin@learnova.app` | `admin123` |
-| Instructor | `instructor@learnova.app` | `instructor123` |
-| Student | `demo@learnova.app` | `password123` |
+| Instructor | `instructor@learnova.app` (Ian Instructor), `priya@learnova.app` (Priya Mehta) | `instructor123` |
+| Student | `demo@learnova.app` (Demo Learner), `rahul@learnova.app`, `sofia@learnova.app`, `liam@learnova.app` | `password123` |
 
 > Local-dev only. Never use these in production.
-> The demo student starts enrolled in two courses with progress, so the dashboard shows data immediately.
+> The seed creates 10 published courses, 7 users and 9 enrollments with lesson progress, so every dashboard shows data immediately.
 
 ## Tests
 
-Linux:
+Both halves of the app are tested, and CI runs both on every push and pull request.
+
+- **Server** — Jest + supertest integration tests against a real Postgres (`cd server && npm test`).
+- **Client** — Vitest + React Testing Library (`cd client && npm test`): API layer, course card, route guards and the login form. `npm run build` is also part of CI.
+
+Server tests, by OS. Linux:
 ```bash
 cd server && npm test
 ```
