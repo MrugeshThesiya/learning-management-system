@@ -44,16 +44,24 @@ export function isTokenExpired(token) {
 
 async function request(path, { method = 'GET', body, auth = true, signal } = {}) {
   const headers = { 'Content-Type': 'application/json' };
-  if (auth) {
-    const token = getToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
+  // Always send the token when we have one (public endpoints use it to unlock drafts for owners);
+  // `auth` only controls whether a 401 means "your session died".
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal,
+    });
+  } catch (e) {
+    if (e.name === 'AbortError') throw e;
+    const err = new Error('Cannot reach the server. Check that the API is running and try again.');
+    err.network = true;
+    throw err;
   }
-  const res = await fetch(`${API_BASE}${path}`, {
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-    signal,
-  });
   let data = null;
   try { data = await res.json(); } catch { data = null; }
   if (res.status === 401 && auth) {
@@ -74,19 +82,56 @@ export const api = {
   get: (p, o) => request(p, { ...o, method: 'GET' }),
   post: (p, body, o) => request(p, { ...o, method: 'POST', body }),
   patch: (p, body, o) => request(p, { ...o, method: 'PATCH', body }),
+  put: (p, body, o) => request(p, { ...o, method: 'PUT', body }),
+  del: (p, o) => request(p, { ...o, method: 'DELETE' }),
 
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password }, auth: false }),
   register: (payload) => request('/auth/register', { method: 'POST', body: payload, auth: false }),
   me: () => request('/auth/me', { method: 'GET' }),
 
+  stats: () => request('/stats', { method: 'GET', auth: false }),
   listCourses: () => request('/courses', { method: 'GET', auth: false }),
   searchCourses: (q) => request(`/courses/search?q=${encodeURIComponent(q || '')}`, { method: 'GET', auth: false }),
+  getCourse: (id) => request(`/courses/${id}`, { method: 'GET', auth: false }),
   courseLessons: (id) => request(`/courses/${id}/lessons`, { method: 'GET', auth: false }),
-  courseAssignments: (id) => request(`/assignments/course/${id}`, { method: 'GET', auth: false }),
+  courseProgress: (id) => request(`/courses/${id}/progress`, { method: 'GET' }),
+  setLessonDone: (courseId, lessonId, done) => request(`/courses/${courseId}/lessons/${lessonId}/complete`, { method: 'PUT', body: { done } }),
+  courseAssignments: (id) => request(`/assignments/course/${id}`, { method: 'GET' }),
+  submitAssignment: (id, content) => request(`/assignments/${id}/submit`, { method: 'POST', body: { content } }),
 
   enroll: (course_id) => request('/enrollments', { method: 'POST', body: { course_id } }),
   myEnrollments: () => request('/enrollments/mine', { method: 'GET' }),
-  updateProgress: (id, progress) => request(`/enrollments/${id}/progress`, { method: 'PATCH', body: { progress } }),
+
+  // Quizzes
+  courseQuizzes: (courseId) => request(`/quizzes/course/${courseId}`, { method: 'GET' }),
+  getQuiz: (quizId) => request(`/quizzes/${quizId}`, { method: 'GET' }),
+  submitQuiz: (quizId, answers) => request(`/quizzes/${quizId}/submit`, { method: 'POST', body: { answers } }),
+
+  // Instructor studio
+  teachingCourses: () => request('/courses/teaching', { method: 'GET' }),
+  allCourses: () => request('/courses/all', { method: 'GET' }),
+  createCourse: (payload) => request('/courses', { method: 'POST', body: payload }),
+  updateCourse: (id, payload) => request(`/courses/${id}`, { method: 'PATCH', body: payload }),
+  addLesson: (courseId, payload) => request(`/courses/${courseId}/lessons`, { method: 'POST', body: payload }),
+  deleteCourse: (id) => request(`/courses/${id}`, { method: 'DELETE' }),
+  updateLesson: (courseId, lessonId, payload) => request(`/courses/${courseId}/lessons/${lessonId}`, { method: 'PATCH', body: payload }),
+  deleteQuiz: (quizId) => request(`/quizzes/${quizId}`, { method: 'DELETE' }),
+  deleteAssignment: (id) => request(`/assignments/${id}`, { method: 'DELETE' }),
+  deleteLesson: (courseId, lessonId) => request(`/courses/${courseId}/lessons/${lessonId}`, { method: 'DELETE' }),
+  createQuiz: (course_id, title) => request('/quizzes', { method: 'POST', body: { course_id, title } }),
+  quizQuestions: (quizId) => request(`/quizzes/${quizId}/questions`, { method: 'GET' }),
+  addQuestion: (quizId, payload) => request(`/quizzes/${quizId}/questions`, { method: 'POST', body: payload }),
+  deleteQuestion: (quizId, questionId) => request(`/quizzes/${quizId}/questions/${questionId}`, { method: 'DELETE' }),
+  quizAttempts: (quizId) => request(`/quizzes/${quizId}/attempts`, { method: 'GET' }),
+  createAssignment: (payload) => request('/assignments', { method: 'POST', body: payload }),
+  assignmentSubmissions: (assignmentId) => request(`/assignments/${assignmentId}/submissions`, { method: 'GET' }),
+  gradeSubmission: (submissionId, grade) => request(`/assignments/submissions/${submissionId}/grade`, { method: 'PATCH', body: { grade } }),
+
+  // Admin
+  adminOverview: () => request('/admin/overview', { method: 'GET' }),
+  adminSetRole: (id, role) => request(`/admin/users/${id}`, { method: 'PATCH', body: { role } }),
+  adminDeleteUser: (id) => request(`/admin/users/${id}`, { method: 'DELETE' }),
+  adminUsers: () => request('/admin/users', { method: 'GET' }),
 };
 
 export { TOKEN_KEY, USER_KEY };

@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { api } from '../lib/api.js';
-import CourseCard from '../components/CourseCard.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+import CourseCard, { canManage } from '../components/CourseCard.jsx';
 import { Alert, CourseSkeleton, EmptyState } from '../components/Feedback.jsx';
 
 export default function Courses() {
+  const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [q, setQ] = useState('');
@@ -15,49 +17,28 @@ export default function Courses() {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    const t = setTimeout(() => setDebounced(q.trim()), 350);
+    const t = setTimeout(() => setDebounced(q.trim()), 300);
     return () => clearTimeout(t);
   }, [q]);
 
+  // Enrollments load once; the course list reloads whenever the (debounced) search term changes.
+  useEffect(() => {
+    if (!user) return;
+    api.myEnrollments().then((e) => setEnrollments(Array.isArray(e) ? e : [])).catch(() => {});
+  }, [user]);
+
   useEffect(() => {
     let alive = true;
     (async () => {
-      setLoading(true);
+      if (debounced) setSearching(true); else setLoading(true);
       setErr(null);
       try {
-        const [c, e] = await Promise.all([
-          api.listCourses().catch(() => { throw new Error('Could not reach the course service. Is the API running on :4000?'); }),
-          api.myEnrollments().catch(() => []),
-        ]);
-        if (!alive) return;
-        setCourses(Array.isArray(c) ? c : []);
-        setEnrollments(Array.isArray(e) ? e : []);
+        const c = await (debounced ? api.searchCourses(debounced) : api.listCourses());
+        if (alive) setCourses(Array.isArray(c) ? c : []);
       } catch (e2) {
         if (alive) setErr(e2.message);
-      } finally { if (alive) setLoading(false); }
+      } finally { if (alive) { setLoading(false); setSearching(false); } }
     })();
-    return () => { alive = false; };
-  }, []);
-
-  useEffect(() => {
-    if (!debounced) return;
-    let alive = true;
-    (async () => {
-      setSearching(true);
-      try {
-        const r = await api.searchCourses(debounced);
-        if (alive && Array.isArray(r)) setCourses(r);
-      } catch { /* keep current list */ }
-      finally { if (alive) setSearching(false); }
-    })();
-    return () => { alive = false; };
-  }, [debounced]);
-
-  // If search cleared, reload full list
-  useEffect(() => {
-    if (debounced !== '') return;
-    let alive = true;
-    api.listCourses().then((c) => { if (alive && Array.isArray(c)) setCourses(c); }).catch(() => {});
     return () => { alive = false; };
   }, [debounced]);
 
@@ -68,15 +49,10 @@ export default function Courses() {
   }, [enrollments]);
 
   const visible = useMemo(() => {
-    let list = courses;
-    if (filter === 'enrolled') list = list.filter((c) => enrolledMap.has(String(c.id)));
-    if (filter === 'new') list = list.filter((c) => !enrolledMap.has(String(c.id)));
-    if (!debounced) return list;
-    const needle = debounced.toLowerCase();
-    // Client-side fallback filter (server already filters too)
-    const serverFiltered = list.some((c) => (c.title || '').toLowerCase().includes(needle));
-    return serverFiltered ? list : courses.filter((c) => ((c.title || '') + ' ' + (c.description || '')).toLowerCase().includes(needle));
-  }, [courses, enrolledMap, filter, debounced]);
+    if (filter === 'enrolled') return courses.filter((c) => enrolledMap.has(String(c.id)));
+    if (filter === 'new') return courses.filter((c) => !enrolledMap.has(String(c.id)));
+    return courses;
+  }, [courses, enrolledMap, filter]);
 
   const enroll = async (course) => {
     setEnrollingId(course.id);
@@ -93,7 +69,7 @@ export default function Courses() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Course catalog</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{courses.length} published {courses.length === 1 ? 'course' : 'courses'} · {enrollments.length} enrolled</p>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{courses.length} {debounced ? 'matching' : 'published'} {courses.length === 1 ? 'course' : 'courses'}{user?.role === 'student' ? ` · ${enrollments.length} enrolled` : ''}</p>
         </div>
         <div className="relative w-full md:w-80">
           <svg viewBox="0 0 24 24" className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" /></svg>
@@ -105,14 +81,14 @@ export default function Courses() {
         </div>
       </div>
 
-      <div className="flex gap-2">
+      {user?.role === 'student' && <div className="flex gap-2">
         {[['all', 'All'], ['new', 'Not enrolled'], ['enrolled', 'Enrolled']].map(([v, label]) => (
           <button key={v} onClick={() => setFilter(v)}
             className={`px-4 py-2 rounded-xl text-sm font-semibold border transition ${filter === v ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'}`}>
             {label}
           </button>
         ))}
-      </div>
+      </div>}
 
       {err && <Alert>{err}</Alert>}
 
@@ -132,6 +108,7 @@ export default function Courses() {
               enrolled={enrolledMap.has(String(c.id))}
               progress={enrolledMap.get(String(c.id))?.progress}
               onEnroll={enroll} enrolling={enrollingId === c.id}
+              manageable={canManage(user, c)}
             />
           ))}
         </div>

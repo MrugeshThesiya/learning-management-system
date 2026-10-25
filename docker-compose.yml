@@ -14,9 +14,11 @@ services:
       DATABASE_URL: postgres://lms:lms@db:5432/lms
       JWT_SECRET: change-me
       PORT: "4000"
+    # The DB is ephemeral (tmpfs), so seed demo data on every start (idempotent)
+    command: sh -c "node src/seed.js && npm start"
     ports: ["4000:4000"]
     depends_on: [db]
   client:
     build: { context: ., dockerfile: Dockerfile.client }
-    ports: ["5174:5173"]
+    ports: ["5173:5173"]
     depends_on: [server]

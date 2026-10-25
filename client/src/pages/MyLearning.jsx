@@ -5,7 +5,6 @@ import CourseCard from '../components/CourseCard.jsx';
 import { Alert, CourseSkeleton, EmptyState } from '../components/Feedback.jsx';
 
 export default function MyLearning() {
-  const [courses, setCourses] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
@@ -14,20 +13,19 @@ export default function MyLearning() {
     let alive = true;
     (async () => {
       try {
-        const [c, e] = await Promise.all([api.listCourses(), api.myEnrollments()]);
-        if (!alive) return;
-        setCourses(Array.isArray(c) ? c : []);
-        setEnrollments(Array.isArray(e) ? e : []);
+        const e = await api.myEnrollments();
+        if (alive) setEnrollments(Array.isArray(e) ? e : []);
       } catch (e2) { if (alive) setErr(e2.message); }
       finally { if (alive) setLoading(false); }
     })();
     return () => { alive = false; };
   }, []);
 
-  const enrolled = useMemo(() => {
-    const m = new Map(enrollments.map((e) => [String(e.course_id), e]));
-    return courses.filter((c) => m.has(String(c.id))).map((c) => ({ ...c, _enr: m.get(String(c.id)) }));
-  }, [courses, enrollments]);
+  // Enrollment rows already carry their course info, so unpublished courses stay reachable.
+  const enrolled = useMemo(
+    () => enrollments.map((e) => ({ id: e.course_id, title: e.title, description: e.description, is_published: e.is_published, instructor_name: e.instructor_name, lessons_count: e.lessons_count, _enr: e })),
+    [enrollments]
+  );
 
   const completed = enrolled.filter((c) => Number(c._enr?.progress || 0) >= 100).length;
   const inProgress = enrolled.length - completed;

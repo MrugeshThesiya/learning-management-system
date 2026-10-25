@@ -85,7 +85,6 @@ export default function Register() {
             <button disabled={busy} className="w-full rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold py-3 hover:bg-indigo-600 dark:hover:bg-slate-200 transition disabled:opacity-60 flex items-center justify-center gap-2">
               {busy && <InlineSpinner />} {busy ? 'Creating account…' : 'Create account'}
             </button>
-            <p className="text-center text-xs text-slate-400 dark:text-slate-500">By continuing you agree to the Terms & Privacy Policy.</p>
           </form>
         </div>
       </div>

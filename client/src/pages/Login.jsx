@@ -13,7 +13,6 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
-  const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(null);
 
@@ -25,9 +24,6 @@ export default function Login() {
     setBusy(true);
     try {
       await login(email, password);
-      // remember flag is informational — token already persists; if unchecked we keep session-only
-      if (!remember) sessionStorage.setItem('lms_session_only', '1');
-      else sessionStorage.removeItem('lms_session_only');
       navigate(from, { replace: true });
     } catch (e2) {
       setErr(e2.message || 'Sign in failed. Check your details and try again.');
@@ -47,13 +43,6 @@ export default function Login() {
         <div className="relative">
           <h2 className="text-4xl font-black leading-tight tracking-tight">Welcome back.<br />Let's keep the streak alive.</h2>
           <p className="mt-4 text-slate-400 max-w-md">Pick up right where you left off — your enrollments, progress and grades are exactly as you left them.</p>
-          <div className="mt-8 grid grid-cols-3 gap-3 max-w-md">
-            {[['12k+', 'learners'], ['240+', 'courses'], ['4.9', 'rating']].map(([v, k]) => (
-              <div key={k} className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur">
-                <p className="font-extrabold text-xl">{v}</p><p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">{k}</p>
-              </div>
-            ))}
-          </div>
         </div>
         <p className="relative text-xs text-slate-500">Protected by secure JWT sessions · Your login persists across reloads</p>
       </div>
@@ -98,14 +87,9 @@ export default function Login() {
                 </button>
               </div>
             </div>
-            <label className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-slate-300 select-none">
-              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 rounded accent-indigo-600" />
-              Keep me signed in on this device
-            </label>
             <button disabled={busy} className="w-full rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold py-3 hover:bg-indigo-600 dark:hover:bg-slate-200 transition disabled:opacity-60 flex items-center justify-center gap-2">
               {busy && <InlineSpinner />} {busy ? 'Signing you in…' : 'Sign in'}
             </button>
-            <p className="text-center text-xs text-slate-400 dark:text-slate-500">Demo: use the README creds — sessions survive page reloads.</p>
           </form>
         </div>
       </div>

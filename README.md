@@ -8,23 +8,39 @@ A full-stack Learning Management System built with **React** (frontend), **Node.
 - 23BCP525D — Vaidehi Desai
 
 ## Agile Development Process
-We followed Scrum-style iterations across 6 sprints (2 weeks each):
+We work in **2-week Scrum sprints** with a prioritised product backlog, a Definition of Done, feature branches and pull requests, and CI on every push. Six sprints took the product from foundations to a packaged, tested release:
+
 1. Sprint 1 — Project setup, authentication, base models
 2. Sprint 2 — Course & lesson management
 3. Sprint 3 — Enrollment & progress tracking
 4. Sprint 4 — Quizzes & assignments with grading
-5. Sprint 5 — Search, categories, dashboards
-6. Sprint 6 — Dockerization, CI/CD, polish
+5. Sprint 5 — Search, dashboards
+6. Sprint 6 — Dockerization, CI/CD, hardening, polish
 
-Ceremonies: sprint planning, daily standups, sprint review, retrospective. Work tracked via feature branches and pull requests with conventional commits (`feat:`, `fix:`, `chore:`, `test:`, `docs:`, `ci:`).
+Ceremonies: sprint planning, daily stand-up, backlog refinement, sprint review (demo) and retrospective. Work is tracked as user stories with acceptance criteria; branches follow `feature/<id>-<slug>` and commits use Conventional Commits (`feat:`, `fix:`, `chore:`, `test:`, `docs:`, `ci:`).
+
+| Document | Purpose |
+| --- | --- |
+| [AGILE.md](AGILE.md) | Process overview, roles, cadence, tooling |
+| [Product vision](docs/agile/product-vision.md) | Goals, personas, success measures |
+| [Product backlog](docs/agile/product-backlog.md) | Epics, user stories, acceptance criteria, status |
+| [Sprint plan](docs/agile/sprint-plan.md) | Sprint goals, increments, audit findings and retrospective |
+| [Definition of Done](docs/agile/definition-of-done.md) | Ready/Done checklists and working agreements |
+| [Workflow](docs/agile/workflow.md) | Branching, review and release flow |
+| [Risks & impediments](docs/agile/risks-and-impediments.md) | Risk register and resolved blockers |
+| [Ceremony templates](docs/agile/templates/) | Planning, stand-up, review, retrospective |
+| [CHANGELOG](CHANGELOG.md) | Release history by sprint |
 
 ## Features
-- JWT-based registration/login with roles (student/instructor)
-- Course creation, publishing, lessons
-- Student enrollment and progress tracking
-- Quizzes with questions and scoring
-- Assignments with submissions and grading
+- JWT-based registration/login with roles (student/instructor/admin), persistent sessions re-validated on reload
+- Role-based workspaces: student dashboard (enrollments, progress), instructor studio (create courses/lessons/quizzes, grade submissions), admin console (users, all courses, publish control)
+- Course creation, publishing (drafts are private to the owner/admin), lessons
+- Student enrollment; progress is computed from completed lessons and stored server-side
+- Quizzes: instructors author questions, students take them and see per-question results
+- Assignments: students submit/resubmit work, instructors grade it (0–100)
 - Course search
+- Admin console: change roles, delete users and courses; instructors can edit lessons and delete lessons, quizzes, assignments and whole courses
+- Dark mode by default with light-mode toggle
 - React UI with routing
 - Dockerized stack + GitHub Actions CI
 
@@ -33,6 +49,8 @@ Ceremonies: sprint planning, daily standups, sprint review, retrospective. Work 
 docker compose up --build
 ```
 Frontend: http://localhost:5173, Backend: http://localhost:4000
+
+The compose database is ephemeral; the server container seeds demo data on every start.
 
 ## Run locally
 Backend (needs Postgres — easiest: `docker compose up -d db` from the repo root):
@@ -44,6 +62,7 @@ Frontend:
 ```bash
 cd client && npm install && npm run dev
 ```
+> File watching uses polling (`vite.config.js`, `nodemon --legacy-watch`) so edits are picked up on FUSE/NTFS/network drives, where inotify events never fire. Without it the dev server keeps serving stale code (e.g. new routes 404).
 
 ## Demo data & test credentials
 Seed demo users, courses, lessons, a quiz, an assignment, and enrollments:
@@ -80,12 +99,13 @@ cd server; npm test
 
 
 ## API Endpoints
-- POST /auth/register, POST /auth/login
-- GET/POST /courses, GET /courses/search?q=
-- POST /courses/:id/lessons, GET /courses/:id/lessons
+- POST /auth/register, POST /auth/login, GET /auth/me
+- GET/POST /courses, GET /courses/search?q=, GET /courses/all, GET /courses/teaching (instructor/admin), PATCH /courses/:id (owner/admin)
+- POST /courses/:id/lessons (owner/admin), GET /courses/:id/lessons
 - POST /enrollments, GET /enrollments/mine, PATCH /enrollments/:id/progress
-- POST /quizzes, POST /quizzes/:id/questions, GET /quizzes/:id, POST /quizzes/:id/submit
-- POST /assignments, GET /assignments/course/:id, POST /assignments/:id/submit, PATCH /assignments/submissions/:id/grade
+- POST /quizzes, GET /quizzes/course/:courseId, POST /quizzes/:id/questions, GET /quizzes/:id/attempts (owner/admin), GET /quizzes/:id, POST /quizzes/:id/submit
+- POST /assignments, GET /assignments/course/:id, GET /assignments/:id/submissions (owner/admin), POST /assignments/:id/submit, PATCH /assignments/submissions/:id/grade (owner/admin)
+- GET /admin/overview, GET /admin/users (admin only)
 
 ## Architecture
 ```

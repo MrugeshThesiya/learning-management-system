@@ -27,7 +27,6 @@ export default function Footer({ minimal }) {
           <ul className="mt-4 space-y-2.5 text-sm">
             <li><Link to="/courses" className="hover:text-white">Course catalog</Link></li>
             <li><Link to="/dashboard" className="hover:text-white">Dashboard</Link></li>
-            <li><Link to="/my-learning" className="hover:text-white">My learning</Link></li>
             <li><Link to="/register" className="hover:text-white">Create account</Link></li>
           </ul>
         </div>
@@ -40,18 +39,15 @@ export default function Footer({ minimal }) {
           </ul>
         </div>
         <div>
-          <h4 className="font-semibold text-white text-sm">Stay in the loop</h4>
-          <p className="mt-4 text-sm text-slate-400">New courses and features, once a month. No spam.</p>
-          <form onSubmit={(e) => e.preventDefault()} className="mt-4 flex gap-2">
-            <input placeholder="you@email.com" className="flex-1 min-w-0 rounded-xl bg-white/10 border border-white/10 px-3.5 py-2.5 text-sm placeholder:text-slate-500 text-white focus:outline-none focus:border-indigo-400" />
-            <button className="rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-semibold px-4 transition">Join</button>
-          </form>
+          <h4 className="font-semibold text-white text-sm">Need help?</h4>
+          <p className="mt-4 text-sm text-slate-400">Questions about your account or a course? Reach out and we'll get back to you.</p>
+          <a href="mailto:support@learnova.app" className="mt-4 inline-block text-sm font-semibold text-indigo-300 hover:text-white">support@learnova.app</a>
         </div>
       </div>
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row justify-between gap-2 text-xs text-slate-500">
           <p>© 2026 Learnova LMS. All rights reserved.</p>
-          <p>Privacy · Terms · Status</p>
+          
         </div>
       </div>
     </footer>

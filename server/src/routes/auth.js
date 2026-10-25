@@ -24,22 +24,30 @@ router.post('/register', async (req, res) => {
   if (!email || !password || !displayName) {
     return res.status(400).json({ error: 'Name, email and password are required' });
   }
+  // Public sign-up may only create students or instructors; admins are provisioned out of band.
+  if (role !== undefined && !['student', 'instructor'].includes(role)) {
+    return res.status(400).json({ error: "Role must be 'student' or 'instructor'" });
+  }
+  if (String(password).length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
   try {
     const hash = await bcrypt.hash(password, 10);
     const r = await query(
       'INSERT INTO users (email, full_name, password_hash, role) VALUES ($1,$2,$3,$4) RETURNING id,email,full_name,role,created_at',
-      [email, displayName, hash, role || 'student']
+      [String(email).trim().toLowerCase(), String(displayName).trim(), hash, role || 'student']
     );
     const user = r.rows[0];
     const token = signToken(user);
     res.status(201).json({ access_token: token, token, user });
-  } catch (e) { res.status(400).json({ error: e.message }); }
+  } catch (e) {
+    if (e.code === '23505') return res.status(409).json({ error: 'An account with this email already exists' });
+    throw e;
+  }
 });
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
-  const r = await query('SELECT * FROM users WHERE email=$1', [email]);
+  const r = await query('SELECT * FROM users WHERE email=$1', [String(email).trim().toLowerCase()]);
   const u = r.rows[0];
   if (!u || !(await bcrypt.compare(password, u.password_hash))) {
     return res.status(401).json({ error: 'Invalid credentials' });
