@@ -1,24 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MarketingNav } from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
+import { api } from '../lib/api.js';
+import { coverFor } from '../components/CourseCard.jsx';
 
 const FEATURES = [
   { t: 'Guided course paths', d: 'Structured lessons that take you from fundamentals to real projects, with clear ordering and pacing.', icon: 'M4 6h16M4 12h16M4 18h10' },
   { t: 'Quizzes that stick', d: 'Auto-graded quizzes with instant scoring so you know exactly what to review next.', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
   { t: 'Assignments & feedback', d: 'Submit work, get grades and keep every submission organized by course.', icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.4-9.4a2 2 0 012.8 2.8L12 15l-4 1 1-4 8.6-8.6z' },
   { t: 'Progress that motivates', d: 'Enrollment-level progress tracking keeps momentum visible across everything you learn.', icon: 'M3 17l6-6 4 4 8-8' },
-  { t: 'Search in seconds', d: 'Find any course instantly with full-text search across titles and descriptions.', icon: 'M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z' },
+  { t: 'Search in seconds', d: 'Find any course instantly by searching titles, descriptions and instructors.', icon: 'M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z' },
   { t: 'Instructor friendly', d: 'Publish courses, add lessons, and manage content with a clean API-first workflow.', icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6' },
 ];
 
-const SHOWCASE = [
-  { title: 'Full-Stack Web Development', tag: 'Development', desc: 'From HTML to deployment — build and ship production apps.', grad: 'from-indigo-600 via-violet-600 to-fuchsia-500', meta: '24 lessons · 6 quizzes' },
-  { title: 'Data Science Foundations', tag: 'Data', desc: 'Statistics, Python and visualization with real datasets.', grad: 'from-sky-600 via-blue-600 to-indigo-600', meta: '18 lessons · 5 quizzes' },
-  { title: 'UI Design Systems', tag: 'Design', desc: 'Typography, color and components that scale to products.', grad: 'from-emerald-600 via-teal-600 to-cyan-500', meta: '16 lessons · 4 projects' },
-];
+const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 export default function Landing() {
+  const [stats, setStats] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [featured, setFeatured] = useState(null);
+  const [featuredLessons, setFeaturedLessons] = useState([]);
+  useEffect(() => {
+    let alive = true;
+    api.stats().then((d) => { if (alive) setStats(d); }).catch(() => {});
+    api.listCourses().then(async (d) => {
+      if (!alive || !Array.isArray(d)) return;
+      setCourses(d.slice(0, 3));
+      // feature the course with the most students (ties: most lessons)
+      const top = [...d].sort((x, y) => (y.students - x.students) || (y.lessons_count - x.lessons_count))[0];
+      if (!top) return;
+      setFeatured(top);
+      const l = await api.courseLessons(top.id).catch(() => []);
+      if (alive) setFeaturedLessons(l);
+    }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f6f7fb] dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-x-clip">
       <MarketingNav />
@@ -54,69 +72,51 @@ export default function Landing() {
               Sign in to your account
             </Link>
           </div>
-          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-slate-500 dark:text-slate-400">
-            <span><b className="text-slate-900 dark:text-white">12k+</b> learners</span>
-            <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-            <span><b className="text-slate-900 dark:text-white">240+</b> courses</span>
-            <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-            <span><b className="text-slate-900 dark:text-white">4.9/5</b> avg rating</span>
-          </div>
+          {stats && (
+            <div className="mt-8 flex items-center justify-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+              <span><b className="text-slate-900 dark:text-white">{stats.learners}</b> {stats.learners === 1 ? 'member' : 'members'}</span>
+              <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+              <span><b className="text-slate-900 dark:text-white">{stats.courses}</b> {stats.courses === 1 ? 'course' : 'courses'}</span>
+              <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+              <span><b className="text-slate-900 dark:text-white">{stats.lessons}</b> {stats.lessons === 1 ? 'lesson' : 'lessons'}</span>
+            </div>
+          )}
 
-          {/* Product mock */}
-          <div className="mt-14 relative max-w-4xl mx-auto">
-            <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500/20 via-violet-500/20 to-fuchsia-500/20 blur-2xl rounded-[2rem]" />
-            <div className="relative rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-indigo-950/10 overflow-hidden text-left">
-              <div className="flex items-center gap-1.5 px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-400" /><span className="h-2.5 w-2.5 rounded-full bg-amber-400" /><span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                <span className="ml-3 text-xs font-medium text-slate-400">app.learnova.app/dashboard</span>
-              </div>
-              <div className="grid sm:grid-cols-[220px_1fr]">
-                <div className="hidden sm:block border-r border-slate-100 dark:border-slate-800 p-4 space-y-2 bg-slate-50/50 dark:bg-slate-800/30">
-                  {['Dashboard', 'Catalog', 'My learning', 'Quizzes', 'Settings'].map((x, i) => (
-                    <div key={x} className={`px-3 py-2.5 rounded-xl text-sm font-semibold ${i === 0 ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700'}`}>{x}</div>
-                  ))}
-                  <div className="mt-4 rounded-xl p-3 bg-gradient-to-br from-indigo-600 to-violet-600 text-white">
-                    <p className="text-xs font-bold">Weekly goal</p>
-                    <p className="text-[11px] opacity-80">4 of 5 lessons done</p>
-                    <div className="mt-2 h-1.5 rounded-full bg-white/25"><div className="h-full w-4/5 rounded-full bg-white" /></div>
+          {/* Featured course — live data from the catalog */}
+          {featured && (
+            <div className="mt-14 relative max-w-4xl mx-auto">
+              <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500/20 via-violet-500/20 to-fuchsia-500/20 blur-2xl rounded-[2rem]" />
+              <div className="relative rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-indigo-950/10 overflow-hidden text-left grid md:grid-cols-[1fr_1.1fr]">
+                <div className={`relative p-7 sm:p-8 bg-gradient-to-br ${coverFor(featured.id)} text-white flex flex-col justify-between gap-6`}>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.25),transparent_50%)]" />
+                  <div className="relative">
+                    <p className="text-xs font-bold uppercase tracking-widest text-white/80">Featured course</p>
+                    <h3 className="mt-2 text-2xl font-black tracking-tight">{featured.title}</h3>
+                    <p className="mt-2 text-sm text-white/85 line-clamp-4">{featured.description}</p>
+                  </div>
+                  <div className="relative">
+                    <p className="text-xs font-semibold text-white/80">
+                      {plural(featured.lessons_count, 'lesson')} · {plural(featured.quizzes_count, 'quiz', 'quizzes')} · {plural(featured.assignments_count, 'assignment')}
+                    </p>
+                    <p className="text-xs text-white/70 mt-0.5">Taught by {featured.instructor_name || 'an instructor'}</p>
+                    <Link to="/register" className="mt-4 inline-flex px-5 py-2.5 rounded-xl bg-white text-slate-900 text-sm font-bold hover:bg-slate-100 transition">Enroll free</Link>
                   </div>
                 </div>
-                <div className="p-5 sm:p-6">
-                  <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Continue learning</p>
-                  <h3 className="mt-1 font-bold text-lg text-slate-900 dark:text-white">Full-Stack Web Development</h3>
-                  <div className="mt-3 h-2.5 rounded-full bg-slate-100 dark:bg-slate-700"><div className="h-full w-2/3 rounded-full bg-gradient-to-r from-indigo-600 to-violet-500" /></div>
-                  <div className="mt-5 grid grid-cols-3 gap-3">
-                    {[['Enrolled', '8'], ['Hours', '32'], ['Streak', '12d']].map(([k, v]) => (
-                      <div key={k} className="rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/60 p-3 text-center">
-                        <p className="font-extrabold text-lg text-slate-900 dark:text-white">{v}</p><p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{k}</p>
-                      </div>
+                <div className="p-6 sm:p-7">
+                  <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">What you'll learn</p>
+                  <ol className="mt-3 space-y-2">
+                    {featuredLessons.slice(0, 6).map((l, i) => (
+                      <li key={l.id} className="flex gap-3 items-start">
+                        <span className="h-6 w-6 shrink-0 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 text-xs font-bold flex items-center justify-center">{i + 1}</span>
+                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{l.title}</span>
+                      </li>
                     ))}
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <span className="flex-1 text-center text-sm font-semibold bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl py-2.5">Resume lesson 9</span>
-                    <span className="flex-1 text-center text-sm font-semibold border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl py-2.5">Take quiz</span>
-                  </div>
+                  </ol>
+                  {featuredLessons.length > 6 && <p className="mt-3 text-xs text-slate-400">+ {featuredLessons.length - 6} more lessons</p>}
                 </div>
               </div>
             </div>
-            <div className="absolute -left-4 sm:-left-10 top-16 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl px-4 py-3 flex items-center gap-3 animate-[float_5s_ease-in-out_infinite]">
-              <span className="h-9 w-9 rounded-xl bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold">✓</span>
-              <div><p className="text-xs font-bold text-slate-900 dark:text-white">Quiz passed</p><p className="text-[11px] text-slate-500 dark:text-slate-400">9/10 · React basics</p></div>
-            </div>
-            <div className="absolute -right-4 sm:-right-10 bottom-16 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl px-4 py-3 flex items-center gap-3 animate-[float_6s_ease-in-out_infinite]">
-              <span className="h-9 w-9 rounded-xl bg-indigo-100 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold">▲</span>
-              <div><p className="text-xs font-bold text-slate-900 dark:text-white">+18% this week</p><p className="text-[11px] text-slate-500 dark:text-slate-400">Learning activity</p></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* LOGOS */}
-      <section className="py-8 border-y border-slate-200/70 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-sm font-bold text-slate-400 dark:text-slate-500">
-          {['Northwind', 'Acme Corp', 'Globex', 'Initech', 'Umbrella', 'Hooli'].map((b) => (
-            <span key={b} className="tracking-wide">◆ {b}</span>
-          ))}
+          )}
         </div>
       </section>
 
@@ -160,15 +160,13 @@ export default function Landing() {
                 <Link to="/register" className="mt-8 inline-flex px-6 py-3 rounded-2xl bg-white text-slate-900 font-semibold hover:bg-indigo-50 transition">Create free account</Link>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-5 space-y-3">
-                {[['Full-Stack Web Development', 68, 'Lesson 9 · Auth with JWT'], ['Data Science Foundations', 34, 'Lesson 5 · Pandas basics'], ['UI Design Systems', 92, 'Lesson 14 · Final project']].map(([t, p, s]) => (
-                  <div key={t} className="rounded-xl bg-white text-slate-900 p-4">
-                    <div className="flex justify-between items-center gap-3">
-                      <p className="font-bold text-sm">{t}</p>
-                      <span className="text-xs font-bold text-indigo-600">{p}%</span>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-0.5">{s}</p>
-                    <div className="mt-2.5 h-2 rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-fuchsia-500" style={{ width: `${p}%` }} /></div>
-                  </div>
+                <p className="text-xs font-bold uppercase tracking-widest text-indigo-300">Available now</p>
+                {courses.length === 0 && <p className="text-sm text-slate-400">Courses will appear here as soon as instructors publish them.</p>}
+                {courses.map((c) => (
+                  <Link key={c.id} to="/register" className="block rounded-xl bg-white text-slate-900 p-4 hover:bg-indigo-50 transition">
+                    <p className="font-bold text-sm">{c.title}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{plural(c.lessons_count, 'lesson')} · {c.instructor_name || 'Instructor'}</p>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -186,44 +184,37 @@ export default function Landing() {
             </div>
             <Link to="/register" className="text-sm font-semibold text-indigo-700 dark:text-indigo-400 hover:text-indigo-500">Sign up to enroll →</Link>
           </div>
-          <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {SHOWCASE.map((c) => (
-              <div key={c.title} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all">
-                <div className={`h-36 bg-gradient-to-br ${c.grad} relative`}>
-                  <span className="absolute top-3 left-3 text-[11px] font-bold px-2.5 py-1 rounded-full bg-white/20 text-white border border-white/30 backdrop-blur">{c.tag}</span>
+          {courses.length === 0 ? (
+            <p className="mt-8 text-slate-500 dark:text-slate-400">No courses have been published yet — check back soon.</p>
+          ) : (
+            <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {courses.map((c) => (
+                <div key={c.id} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all">
+                  <div className={`h-36 bg-gradient-to-br ${coverFor(c.id)} relative`}>
+                    <span className="absolute top-3 left-3 text-[11px] font-bold px-2.5 py-1 rounded-full bg-white/20 text-white border border-white/30 backdrop-blur">Course</span>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-bold">{c.title}</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{c.description}</p>
+                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 mt-3">
+                      {plural(c.lessons_count, 'lesson')} · {plural(c.quizzes_count, 'quiz', 'quizzes')} · {c.instructor_name || 'Instructor'}
+                    </p>
+                    <Link to="/register" className="mt-4 block text-center text-sm font-semibold bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl py-2.5 hover:bg-indigo-600 dark:hover:bg-slate-200 transition">Enroll free</Link>
+                  </div>
                 </div>
-                <div className="p-5">
-                  <h3 className="font-bold">{c.title}</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{c.desc}</p>
-                  <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 mt-3">{c.meta}</p>
-                  <Link to="/register" className="mt-4 block text-center text-sm font-semibold bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl py-2.5 hover:bg-indigo-600 dark:hover:bg-slate-200 transition">Enroll free</Link>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
       {/* STORIES */}
-      <section id="stories" className="pb-20">
+      <section className="pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-center text-3xl sm:text-4xl font-black tracking-tight">Loved by learners</h2>
-          <div className="mt-10 grid md:grid-cols-3 gap-5">
-            {[['Priya S.', 'Frontend Developer', 'I finished two courses in a month. The progress tracking kept me accountable every single day.'], ['Daniel K.', 'Data Analyst', 'Quizzes with instant scoring are a game changer. I always knew exactly what to revise.'], ['Amara O.', 'Instructor', 'Publishing lessons and grading assignments is the smoothest workflow I have used.']].map(([n, r, q]) => (
-              <figure key={n} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-                <div className="flex gap-1 text-amber-400">★★★★★</div>
-                <blockquote className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">“{q}”</blockquote>
-                <figcaption className="mt-4 flex items-center gap-3">
-                  <span className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-600 to-violet-500 text-white font-bold flex items-center justify-center">{n[0]}</span>
-                  <div><p className="text-sm font-bold">{n}</p><p className="text-xs text-slate-500 dark:text-slate-400">{r}</p></div>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-          <div className="mt-12 rounded-[2rem] bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 p-8 sm:p-12 text-center text-white relative overflow-hidden">
+          <div className="rounded-[2rem] bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 p-8 sm:p-12 text-center text-white relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.25),transparent_60%)]" />
             <h2 className="relative text-3xl sm:text-4xl font-black tracking-tight">Your next skill is one click away</h2>
-            <p className="relative mt-3 text-white/80">Join thousands of learners. Free to start, no credit card required.</p>
+            <p className="relative mt-3 text-white/80">Free to start, no credit card required.</p>
             <div className="relative mt-7 flex flex-col sm:flex-row justify-center gap-3">
               <Link to="/register" className="px-7 py-3.5 rounded-2xl bg-white text-slate-900 font-semibold hover:bg-slate-100 transition">Get started free</Link>
               <Link to="/login" className="px-7 py-3.5 rounded-2xl border border-white/40 font-semibold hover:bg-white/10 transition">Sign in</Link>

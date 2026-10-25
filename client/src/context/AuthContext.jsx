@@ -25,7 +25,9 @@ export function AuthProvider({ children }) {
     setError(null);
   }, []);
 
-  // Validate persisted session against the server (runs on every page reload).
+  // Validate the persisted session against the server (boot, tab focus, other-tab changes).
+  // Only the very first check shows a loading screen — re-checks are silent so open pages and
+  // half-filled forms are never torn down, and a flaky network never logs you out (only a 401 does).
   const validate = useCallback(async () => {
     const t = getToken();
     if (!t || isTokenExpired(t)) {
@@ -35,7 +37,6 @@ export function AuthProvider({ children }) {
       setStatus('guest');
       return null;
     }
-    setStatus((s) => (s === 'loading' ? s : 'loading'));
     try {
       const data = await api.me();
       const freshUser = data?.user || getStoredUser();
@@ -43,21 +44,26 @@ export function AuthProvider({ children }) {
       setStatus('authenticated');
       setError(null);
       return freshUser;
-    } catch {
-      clearSession();
-      setToken(null);
-      setUser(null);
+    } catch (e) {
+      if (e.status === 401) {
+        clearSession();
+        setToken(null);
+        setUser(null);
+        setStatus('guest');
+        return null;
+      }
+      // Server unreachable / 5xx: keep the cached session so the user isn't kicked out.
+      const cached = getStoredUser();
+      if (cached) { setUser(cached); setStatus('authenticated'); return cached; }
       setStatus('guest');
       return null;
     }
   }, [setSession]);
 
   useEffect(() => {
-    if (booted.current) return;
-    booted.current = true;
-    validate();
-    // Re-validate when tab regains focus and when other tabs change auth.
-    const onFocus = () => { validate(); };
+    // Listeners must be (re)attached on every mount — React StrictMode runs this effect twice in dev.
+    if (!booted.current) { booted.current = true; validate(); }
+    const onFocus = () => { if (getToken()) validate(); };
     const onStorage = (e) => {
       if (e.key === 'lms_token' || e.key === 'lms_user') validate();
     };

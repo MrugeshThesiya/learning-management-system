@@ -15,11 +15,17 @@ export function coverFor(id) {
   return COVERS[n % COVERS.length];
 }
 
+// Owners and admins manage a course instead of enrolling in it
+export function canManage(user, course) {
+  if (!user || !course) return false;
+  return user.role === 'admin' || (user.role === 'instructor' && String(course.instructor_id) === String(user.id));
+}
+
 export function initials(title = '?') {
   return title.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?';
 }
 
-export default function CourseCard({ course, enrolled, progress, onEnroll, enrolling }) {
+export default function CourseCard({ course, enrolled, progress, onEnroll, enrolling, manageable }) {
   const cover = coverFor(course.id);
   const pct = Math.round(Number(progress ?? 0));
   return (
@@ -28,7 +34,7 @@ export default function CourseCard({ course, enrolled, progress, onEnroll, enrol
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,white,transparent_45%),radial-gradient(circle_at_85%_15%,white,transparent_35%)]" />
         <div className="absolute top-3 left-3 flex gap-2">
           <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/20 text-white backdrop-blur border border-white/30">
-            {course.category || 'Course'}
+            {course.is_published === false ? 'Draft' : 'Course'}
           </span>
           {enrolled && (
             <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white text-indigo-700">
@@ -40,7 +46,9 @@ export default function CourseCard({ course, enrolled, progress, onEnroll, enrol
           <div className="h-11 w-11 rounded-xl bg-white/95 text-slate-900 font-bold flex items-center justify-center shadow">
             {initials(course.title)}
           </div>
-          <span className="text-white/90 text-xs font-medium">★ 4.8 · Updated 2026</span>
+          <span className="text-white/90 text-xs font-medium">
+            {course.lessons_count ?? 0} {course.lessons_count === 1 ? 'lesson' : 'lessons'}
+          </span>
         </div>
       </div>
       <div className="p-5">
@@ -55,10 +63,14 @@ export default function CourseCard({ course, enrolled, progress, onEnroll, enrol
             </span>
             {course.instructor_name || 'Instructor'}
           </span>
-          <span aria-hidden>·</span>
-          <span>{course.lessons_count ?? 'Self-paced'}</span>
+          {course.students !== undefined && (
+            <>
+              <span aria-hidden>·</span>
+              <span>{course.students} {course.students === 1 ? 'student' : 'students'}</span>
+            </>
+          )}
         </div>
-        {enrolled && (
+        {enrolled && !manageable && (
           <div className="mt-4">
             <div className="flex justify-between text-xs font-medium text-slate-600 dark:text-slate-300 mb-1.5">
               <span>Progress</span><span>{pct}%</span>
@@ -75,7 +87,14 @@ export default function CourseCard({ course, enrolled, progress, onEnroll, enrol
           >
             View
           </Link>
-          {!enrolled ? (
+          {manageable ? (
+            <Link
+              to={`/courses/${course.id}/manage`}
+              className="flex-1 text-center text-sm font-semibold px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-indigo-600 dark:hover:bg-slate-200 transition"
+            >
+              Manage
+            </Link>
+          ) : !enrolled ? (
             <button
               onClick={() => onEnroll?.(course)}
               disabled={enrolling}

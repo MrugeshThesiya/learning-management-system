@@ -13,6 +13,19 @@ export function ProtectedRoute({ children }) {
   return children;
 }
 
+export function RequireRole({ roles, children }) {
+  const { status, user } = useAuth();
+  const location = useLocation();
+  if (status === 'loading') return <FullPageLoader label="Checking permissions…" />;
+  if (status !== 'authenticated') {
+    return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+  }
+  if (!roles.includes(user?.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+}
+
 export function GuestOnly({ children }) {
   const { status } = useAuth();
   const location = useLocation();

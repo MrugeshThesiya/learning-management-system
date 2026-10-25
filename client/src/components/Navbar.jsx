@@ -22,6 +22,9 @@ export function AppNavbar() {
     navigate('/', { replace: true });
   };
 
+  const canTeach = user?.role === 'instructor' || user?.role === 'admin';
+  const dashLabel = user?.role === 'student' ? 'Dashboard' : user?.role === 'instructor' ? 'Teaching' : 'Overview';
+
   const link = ({ isActive }) =>
     `px-3.5 py-2 rounded-xl text-sm font-semibold transition ${isActive ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'}`;
 
@@ -34,9 +37,12 @@ export function AppNavbar() {
           <span className="hidden sm:inline text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-500/20">LMS</span>
         </Link>
         <nav className="hidden md:flex items-center gap-1">
-          <NavLink to="/dashboard" className={link}>Dashboard</NavLink>
+          <NavLink to="/dashboard" className={link}>{dashLabel}</NavLink>
           <NavLink to="/courses" className={link}>Catalog</NavLink>
-          <NavLink to="/my-learning" className={link}>My learning</NavLink>
+          {user?.role === 'student' && <NavLink to="/my-learning" className={link}>My learning</NavLink>}
+          {canTeach && (
+            <Link to="/teach/new" className="ml-1 px-3.5 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-500 transition">+ New course</Link>
+          )}
         </nav>
         <div className="flex items-center gap-2.5">
           <div className="hidden sm:flex flex-col items-end leading-tight mr-1">
@@ -55,9 +61,10 @@ export function AppNavbar() {
       </div>
       {open && (
         <div className="md:hidden border-t border-slate-100 dark:border-slate-800 px-4 py-3 flex flex-col gap-1 bg-white dark:bg-slate-950">
-          <NavLink to="/dashboard" onClick={() => setOpen(false)} className={link}>Dashboard</NavLink>
+          <NavLink to="/dashboard" onClick={() => setOpen(false)} className={link}>{dashLabel}</NavLink>
           <NavLink to="/courses" onClick={() => setOpen(false)} className={link}>Catalog</NavLink>
-          <NavLink to="/my-learning" onClick={() => setOpen(false)} className={link}>My learning</NavLink>
+          {user?.role === 'student' && <NavLink to="/my-learning" onClick={() => setOpen(false)} className={link}>My learning</NavLink>}
+          {canTeach && <NavLink to="/teach/new" onClick={() => setOpen(false)} className={link}>+ New course</NavLink>}
           <button onClick={doLogout} className="text-left px-3.5 py-2 rounded-xl text-sm font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40">Log out</button>
         </div>
       )}
@@ -79,7 +86,6 @@ export function MarketingNav() {
             <a href="#features" className="hover:text-slate-900 dark:hover:text-white">Features</a>
             <a href="#how" className="hover:text-slate-900 dark:hover:text-white">How it works</a>
             <a href="#courses" className="hover:text-slate-900 dark:hover:text-white">Courses</a>
-            <a href="#stories" className="hover:text-slate-900 dark:hover:text-white">Stories</a>
           </nav>
           <div className="hidden md:flex items-center gap-2">
             <ThemeToggle />
@@ -96,8 +102,8 @@ export function MarketingNav() {
         {open && (
           <div className="md:hidden mt-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-xl flex flex-col gap-1">
             <a href="#features" onClick={() => setOpen(false)} className="px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Features</a>
+            <a href="#how" onClick={() => setOpen(false)} className="px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">How it works</a>
             <a href="#courses" onClick={() => setOpen(false)} className="px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Courses</a>
-            <a href="#stories" onClick={() => setOpen(false)} className="px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Stories</a>
             <div className="flex gap-2 pt-1">
               <Link to="/login" className="flex-1 text-center text-sm font-semibold px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">Sign in</Link>
               <Link to="/register" className="flex-1 text-center text-sm font-semibold px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900">Get started</Link>
