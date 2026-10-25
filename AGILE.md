@@ -16,9 +16,7 @@ We use a lightweight **Scrum** process with **Kanban-style flow** inside each sp
 | Release history | [`CHANGELOG.md`](CHANGELOG.md) |
 
 ## Team
-- 23BCP230 — Vency Thummar
-- 23BCP250 — Mrugesh Thesiya
-- 23BCP525D — Vaidehi Desai
+The team and GitHub profiles are listed in the [README](README.md#team).
 
 Scrum roles (Product Owner, Scrum Master, Developers) are agreed at each sprint planning and **rotate** so everyone practises each role. The current assignment is recorded in that sprint's planning notes (see the [planning template](docs/agile/templates/sprint-planning.md)). All three members are Developers.
 
