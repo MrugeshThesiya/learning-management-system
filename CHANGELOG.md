@@ -12,6 +12,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Entries are grou
 - Landing page featured course and statistics powered by live data.
 - Agile documentation set (`docs/agile/`), PR and issue templates, this changelog.
 - Integration tests for authorization, drafts, enrollment, progress, quizzes, assignments, deletions and bad ids.
+- Access-control and catalogue tests: session validation, role gates on course creation and admin endpoints, admin overview, search (published only), platform stats and course ownership (16 tests in total).
 
 ### Changed
 - Seed is idempotent and sets demo progress from real lesson completions.
