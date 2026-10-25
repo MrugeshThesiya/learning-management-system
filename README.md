@@ -56,3 +56,46 @@ cd server && npm test
 - POST /enrollments, GET /enrollments/mine, PATCH /enrollments/:id/progress
 - POST /quizzes, POST /quizzes/:id/questions, GET /quizzes/:id, POST /quizzes/:id/submit
 - POST /assignments, GET /assignments/course/:id, POST /assignments/:id/submit, PATCH /assignments/submissions/:id/grade
+
+## Architecture
+```
+client (React/Vite)  ->  server (Express)  ->  PostgreSQL
+```
+- Frontend communicates via REST JSON over HTTP.
+- Backend uses `pg` pool; schema auto-initialized on startup.
+- JWT stored client-side (localStorage) and sent as Bearer token.
+
+## Tech Stack
+- Frontend: React 18, React Router 6, Vite 5
+- Backend: Node.js 20, Express 4, bcryptjs, jsonwebtoken, pg
+- Database: PostgreSQL 16
+- DevOps: Docker, Docker Compose, GitHub Actions
+
+## Project Structure
+```
+.
+├── client/            # React app
+├── server/            # Express API
+│   ├── src/
+│   │   ├── index.js
+│   │   ├── db.js
+│   │   ├── schema.sql
+│   │   ├── middleware/
+│   │   └── routes/
+│   └── tests/
+├── docker-compose.yml
+├── Dockerfile.server
+├── Dockerfile.client
+└── .github/workflows/ci.yml
+```
+
+## Environment Variables (server)
+- DATABASE_URL (default postgres://lms:lms@localhost:5432/lms)
+- JWT_SECRET (default "secret")
+- PORT (default 4000)
+
+## Contributing
+Branch from `main`, use conventional commits, open PR. Run tests before pushing.
+
+## License
+MIT
