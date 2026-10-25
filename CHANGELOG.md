@@ -3,6 +3,9 @@
 Format based on [Keep a Changelog](https://keepachangelog.com). Entries are grouped by sprint increment; commit hashes point to the originating work. See [`docs/agile/sprint-plan.md`](docs/agile/sprint-plan.md).
 
 ## [Unreleased] — Sprint 6 hardening & management features
+### Changed
+- Muted the course cover and accent palette (no pink/magenta) for a calmer, more professional look.
+
 ### Added
 - Student quiz-taking with per-question results and best score; assignment submission and resubmission with grades shown to the student (D2, D5).
 - Server-side lesson progress; enrollment progress derives from completed lessons (C3).
@@ -13,6 +16,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com). Entries are grou
 - Agile documentation set (`docs/agile/`), PR and issue templates, this changelog.
 - Integration tests for authorization, drafts, enrollment, progress, quizzes, assignments, deletions and bad ids.
 - Access-control and catalogue tests: session validation, role gates on course creation and admin endpoints, admin overview, search (published only), platform stats and course ownership (16 tests in total).
+- React client test suite (Vitest + Testing Library, 24 tests): API/session layer, course card, route guards and login form; CI now runs client tests and the production build.
+- Seed data: two instructors, four students and ten published courses with realistic enrollments and lesson progress.
 
 ### Changed
 - Seed is idempotent and sets demo progress from real lesson completions.
