@@ -6,7 +6,11 @@ const { pool } = require('./db');
 const USERS = [
   { email: 'admin@learnova.app', full_name: 'Ava Admin', password: 'admin123', role: 'admin' },
   { email: 'instructor@learnova.app', full_name: 'Ian Instructor', password: 'instructor123', role: 'instructor' },
+  { email: 'priya@learnova.app', full_name: 'Priya Mehta', password: 'instructor123', role: 'instructor' },
   { email: 'demo@learnova.app', full_name: 'Demo Learner', password: 'password123', role: 'student' },
+  { email: 'rahul@learnova.app', full_name: 'Rahul Verma', password: 'password123', role: 'student' },
+  { email: 'sofia@learnova.app', full_name: 'Sofia Alvarez', password: 'password123', role: 'student' },
+  { email: 'liam@learnova.app', full_name: 'Liam Chen', password: 'password123', role: 'student' },
 ];
 
 const COURSES = [
@@ -79,6 +83,65 @@ const COURSES = [
       ['CI with GitHub Actions', 'Test and build on every push.'],
     ],
   },
+  {
+    title: 'SQL & Database Design',
+    description: 'Model data properly, write confident queries and keep PostgreSQL fast as it grows.',
+    lessons: [
+      ['Relational thinking', 'Tables, keys and relationships, and how to model a real domain.'],
+      ['Querying with SQL', 'SELECT, JOIN, GROUP BY and subqueries on realistic data.'],
+      ['Normalization', 'Remove duplication without making queries painful.'],
+      ['Indexes & performance', 'Read query plans and add indexes that actually help.'],
+    ],
+    quiz: {
+      title: 'SQL fundamentals check',
+      questions: [
+        ['Which clause filters grouped rows?', ['WHERE', 'HAVING', 'ORDER BY', 'LIMIT'], 1],
+        ['What does a PRIMARY KEY guarantee?', ['Fast sorting', 'Unique, non-null rows', 'Encryption', 'Foreign keys'], 1],
+        ['Which join keeps unmatched rows from the left table?', ['INNER', 'LEFT', 'CROSS', 'SELF'], 1],
+      ],
+    },
+    assignment: ['Design a bookstore schema', 'Model authors, books and orders, then write five queries that answer real questions.', 10],
+  },
+  {
+    instructor: 'priya@learnova.app',
+    title: 'Cybersecurity Essentials',
+    description: 'Threats, defences and secure habits every developer and team should have.',
+    lessons: [
+      ['The threat landscape', 'Who attacks, why, and the most common entry points.'],
+      ['Authentication done right', 'Password hashing, MFA and session handling.'],
+      ['Web app security', 'XSS, CSRF, injection and how to prevent them.'],
+      ['Incident response', 'Detect, contain, recover and write the post-mortem.'],
+    ],
+    quiz: {
+      title: 'Security basics check',
+      questions: [
+        ['Which is the safest way to store passwords?', ['Plain text', 'Reversible encryption', 'Salted hash', 'Base64'], 2],
+        ['What does parameterised SQL prevent?', ['XSS', 'SQL injection', 'CSRF', 'DDoS'], 1],
+      ],
+    },
+  },
+  {
+    instructor: 'priya@learnova.app',
+    title: 'Product Management Basics',
+    description: 'Discover problems worth solving, prioritise ruthlessly and ship with your team.',
+    lessons: [
+      ['What a product manager does', 'Roles, responsibilities and how PMs work with engineering and design.'],
+      ['User research', 'Interviews, surveys and turning feedback into insight.'],
+      ['Prioritisation', 'Impact vs effort, roadmaps and saying no.'],
+      ['Agile delivery', 'Backlogs, sprints and measuring what you ship.'],
+    ],
+    assignment: ['Write a one-page product brief', 'Define the problem, users, success metrics and a first release scope for a product idea.', 14],
+  },
+  {
+    instructor: 'priya@learnova.app',
+    title: 'Technical Writing for Developers',
+    description: 'Clear READMEs, API docs and design notes that people actually read.',
+    lessons: [
+      ['Know your reader', 'Audience, purpose and the shape of good documentation.'],
+      ['READMEs that work', 'Structure a project overview, quick start and troubleshooting.'],
+      ['Documenting APIs', 'Endpoints, examples and error responses.'],
+    ],
+  },
 ];
 
 async function upsertUser(u) {
@@ -99,11 +162,10 @@ async function seed() {
     ids[u.email] = (await upsertUser(u)).id;
     console.log(`user: ${u.email} (${u.role})`);
   }
-  const instructorId = ids['instructor@learnova.app'];
-  const studentId = ids['demo@learnova.app'];
 
   for (const c of COURSES) {
     // No unique constraint on title, so look first to keep the seed idempotent
+    const instructorId = ids[c.instructor || 'instructor@learnova.app'];
     const existing = await pool.query('SELECT id FROM courses WHERE title=$1 ORDER BY id LIMIT 1', [c.title]);
     const courseId = existing.rows[0]
       ? existing.rows[0].id
@@ -154,20 +216,31 @@ async function seed() {
     }
   }
 
-  // Give the demo student something on the dashboard: enrollments with real lesson progress
-  const firstTwo = await pool.query('SELECT id FROM courses WHERE is_published=TRUE ORDER BY id LIMIT 2');
-  const completedCounts = [4, 2];
-  for (let i = 0; i < firstTwo.rows.length; i++) {
-    const courseId = firstTwo.rows[i].id;
+  // Realistic activity: enrollments with real lesson progress (completed lesson counts)
+  const ENROLLMENTS = [
+    ['demo@learnova.app', 'Full-Stack Web Development', 4],
+    ['demo@learnova.app', 'Data Science Foundations', 2],
+    ['rahul@learnova.app', 'Full-Stack Web Development', 6],
+    ['rahul@learnova.app', 'SQL & Database Design', 2],
+    ['sofia@learnova.app', 'Cybersecurity Essentials', 3],
+    ['sofia@learnova.app', 'Product Management Basics', 1],
+    ['sofia@learnova.app', 'UI Design Systems', 4],
+    ['liam@learnova.app', 'Python Programming Basics', 3],
+    ['liam@learnova.app', 'Machine Learning Essentials', 1],
+  ];
+  for (const [email, title, completed] of ENROLLMENTS) {
+    const userId = ids[email];
+    const course = await pool.query('SELECT id FROM courses WHERE title=$1 ORDER BY id LIMIT 1', [title]);
+    const courseId = course.rows[0].id;
     await pool.query(
       `INSERT INTO enrollments (user_id, course_id) VALUES ($1,$2) ON CONFLICT (user_id, course_id) DO NOTHING`,
-      [studentId, courseId]
+      [userId, courseId]
     );
     await pool.query(
       `INSERT INTO lesson_progress (user_id, lesson_id)
        SELECT $1, id FROM lessons WHERE course_id=$2 ORDER BY "order", id LIMIT $3
        ON CONFLICT DO NOTHING`,
-      [studentId, courseId, completedCounts[i] ?? 0]
+      [userId, courseId, completed]
     );
     await pool.query(
       `UPDATE enrollments e SET progress = COALESCE((
@@ -175,7 +248,7 @@ async function seed() {
          FROM lesson_progress lp JOIN lessons l ON l.id = lp.lesson_id
          WHERE l.course_id = e.course_id AND lp.user_id = e.user_id), 0)
        WHERE e.user_id=$1 AND e.course_id=$2`,
-      [studentId, courseId]
+      [userId, courseId]
     );
   }
 
