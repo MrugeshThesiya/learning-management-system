@@ -3,9 +3,11 @@
 A full-stack Learning Management System built with **React** (frontend), **Node.js/Express** (backend), and **PostgreSQL** (database), fully dockerized and developed following **Agile principles**.
 
 ## Team
-- 23BCP230 — Vency Thummar
-- 23BCP250 — Mrugesh Thesiya
-- 23BCP525D — Vaidehi Desai
+| Roll no. | Name | GitHub |
+| --- | --- | --- |
+| 23BCP230 | Vency Thummar | [@Vency-1238](https://github.com/Vency-1238) |
+| 23BCP250 | Mrugesh Thesiya | [@MrugeshThesiya](https://github.com/MrugeshThesiya) |
+| 23BCP525D | Vaidehi Desai | [@VAIDEHIIIII](https://github.com/VAIDEHIIIII) |
 
 ## Agile Development Process
 We work in **2-week Scrum sprints** with a prioritised product backlog, a Definition of Done, feature branches and pull requests, and CI on every push. Six sprints took the product from foundations to a packaged, tested release:
