@@ -8,7 +8,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 const schema = fs.readFileSync(path.join(__dirname,'schema.sql'),'utf8');
-pool.query(schema).catch(e=>console.error(e));
+const initPromise = pool.query(schema).catch(e=>console.error(e));
+app.use(async (req,res,next)=>{ await initPromise; next(); });
 
 app.get('/health', async (req, res) => {
   try { await pool.query('SELECT 1'); res.json({ status: 'ok' }); }
