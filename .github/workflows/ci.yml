@@ -34,3 +34,60 @@ jobs:
       - run: cd client && npm ci
       - run: cd client && npm test
       - run: cd client && npm run build
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: lms
+          POSTGRES_PASSWORD: lms
+          POSTGRES_DB: lms
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: cd server && npm install
+      - run: cd client && npm ci
+      - name: Seed + start API
+        env:
+          DATABASE_URL: postgres://lms:lms@localhost:5432/lms
+          JWT_SECRET: test
+          PORT: '4000'
+        run: |
+          cd server
+          node src/wait-for-db.js
+          node src/seed.js
+          (npm start > /tmp/server.log 2>&1 &)
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4000/health && break
+            sleep 2
+          done
+          curl -sf http://localhost:4000/health
+      - name: Start client (preview build)
+        env:
+          VITE_API_URL: http://localhost:4000
+        run: |
+          cd client
+          npm run build
+          (npx vite preview --port 5173 --host > /tmp/client.log 2>&1 &)
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:5173/ && break
+            sleep 2
+          done
+          curl -sf http://localhost:5173/
+      - run: pip install -r e2e/requirements.txt
+      - run: python -m pytest e2e -v
+      - name: Dump logs on failure
+        if: failure()
+        run: |
+          echo '--- server ---'; tail -50 /tmp/server.log || true
+          echo '--- client ---'; tail -50 /tmp/client.log || true

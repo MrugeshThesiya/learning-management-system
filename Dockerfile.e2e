@@ -1,0 +1,13 @@
+# Test-runner image for the Selenium e2e suite (used with the `e2e` compose
+# profile, alongside selenium/standalone-chrome). Chrome itself lives in the
+# `selenium` service; this image only needs Python + the test deps and talks
+# to it via E2E_SELENIUM_URL (Remote WebDriver).
+FROM python:3.11-slim
+WORKDIR /e2e
+COPY e2e/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY e2e/ ./
+ENV E2E_BASE_URL=http://client:5173 \
+    E2E_API_URL=http://server:4000 \
+    E2E_SELENIUM_URL=http://selenium:4444/wd/hub
+CMD ["pytest", "-v"]

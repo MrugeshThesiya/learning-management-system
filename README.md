@@ -103,6 +103,7 @@ Both halves of the app are tested, and CI runs both on every push and pull reque
 
 - **Server** — Jest + supertest integration tests against a real Postgres (`cd server && npm test`).
 - **Client** — Vitest + React Testing Library (`cd client && npm test`): API layer, course card, route guards and the login form. `npm run build` is also part of CI.
+- **E2E** — Selenium + pytest browser tests (`pip install -r e2e/requirements.txt && python -m pytest e2e -v`): landing, login/register validation, logout, catalog search, enrollment and detail navigation against the running stack. See [e2e/README.md](e2e/README.md). Dockerized via `docker compose --profile e2e up` (selenium grid + runner).
 
 Server tests, by OS. Linux:
 ```bash
